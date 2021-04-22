@@ -1,21 +1,6 @@
-type Person =
-    { Name: string
-      Birthday: System.DateTime }
+type multiset<'a> = list<int * 'a>
 
-let age person =
-    let daysDiff =
-        System
-            .DateTime
-            .Today
-            .Subtract(
-                person.Birthday
-            )
-            .Days
+let (^) a b = [ (a, b) ]
+let (+) ams bms = List.append ams bms
 
-    daysDiff / 365
-
-let p =
-    { Name = "Andreas"
-      Birthday = System.DateTime(1997, 3, 13) }
-
-printfn $"{age p}"
+let ms : multiset<string> = (1 ^ "hello") + (1 ^ "cpn")
