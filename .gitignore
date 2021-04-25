@@ -81,3 +81,5 @@ types.txt
 .fake
 fsacpath.txt
 /out/
+obj
+bin
