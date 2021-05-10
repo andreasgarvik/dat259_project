@@ -6,7 +6,7 @@
 // Code should be in a State module/file
 
 // Third need a way to advance or reverse the state
-// Code should be in the State module/file??
+// Code should be in the State module/file
 
 // Possible ways to represent state
 // 1. In the objects if CPN model consists of objects, immunatillity??
