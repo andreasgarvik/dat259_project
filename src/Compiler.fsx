@@ -1,6 +1,5 @@
 #r "nuget: FSharp.Compiler.Service"
 
-open System
 open FSharp.Compiler.SourceCodeServices
 open FSharp.Compiler.Text
 
@@ -52,7 +51,9 @@ let rec visitExpression =
         match con with
         | SynConst.Int32 (value) -> printfn "%i" value
         | _ -> printfn " - not supported const: %A" con
-    | SynExpr.App (_, _, funExpr, argExpr, _) -> printfn "app expr"
+    | SynExpr.App (_, _, funExpr, argExpr, _) ->
+        visitExpression funExpr
+        visitExpression argExpr
     | expr -> printfn " - not supported expression: %A" expr
 
 
@@ -78,7 +79,7 @@ let visitModulesAndNamespaces modulesOrNss =
         visitDeclarations decls
 
 
-let input = "let sum = 2"
+let input = "er = 2"
 
 let file =
     "/home/andreas/master/dat259/project/src/Test.fsx"

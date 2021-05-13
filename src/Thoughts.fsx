@@ -12,3 +12,6 @@
 // 1. In the objects if CPN model consists of objects, immunatillity??
 // 2. Have a list where every next entry is the calculated state of the previous entry
 // - val nextState : State -> State
+
+
+// Random thought: What if it was possible to translate a program to a CPN Model?

@@ -6,6 +6,7 @@ module CPN =
     let (+) ams bms = List.append ams bms
 
     type Colset = Colset of string
+
     type InitialMarking = InitialMarking of string
 
     // Can colset be interfered from initial marking?
