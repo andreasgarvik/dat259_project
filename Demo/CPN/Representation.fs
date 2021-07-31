@@ -9,9 +9,9 @@
 // }
 
 type Place = {
-    name: string
-    colset: string
-    initialMarking: string
+    name : string
+    colset : string
+    initialMarking : string
 }
 
 // let transition = ["Receive CanCommit"; ["w", "vote"] ]
@@ -22,9 +22,9 @@ type Place = {
 // }
 
 type Transition = {
-    name: string
-    vars: string list
-    guard: string option
+    name : string
+    vars : string list
+    guard : string option
 }
 
 type Direction =
@@ -41,10 +41,10 @@ type Direction =
 // }
 
 type Arc = {
-    place: Place
-    transaction: Transition
-    expr: string
-    direction: Direction
+    place : Place
+    transaction : Transition
+    expr : string
+    direction : Direction
 }
 
 // let Worker = {
@@ -55,8 +55,8 @@ type Arc = {
 // }
 
 type Module = {
-    name: string
-    places: Place list
-    transitions: Transition list
-    arcs: Arc list
+    name : string
+    places : Place list
+    transitions : Transition list
+    arcs : Arc list
 }

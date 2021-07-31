@@ -11,8 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="Representations\Worker.fs" />
-      <Compile Include="Evaluations\Worker.fs" />
+      <Compile Include="Representation.fs" />
+      <Compile Include="Evaluation.fs" />
     </ItemGroup>
 
 </Project>

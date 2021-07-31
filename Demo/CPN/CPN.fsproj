@@ -10,7 +10,6 @@
         <Compile Include="Representation.fs" />
         <Compile Include="Evaluation.fs" />
         <Compile Include="Multiset.fs" />
-        <Compile Include="TestMultiset.fs" />
     </ItemGroup>
 
 </Project>
