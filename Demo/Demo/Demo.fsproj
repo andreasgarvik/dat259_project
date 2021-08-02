@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CPN\CPN.fsproj" />
+        <ProjectReference Include="..\TPC\TPC.fsproj" />
     </ItemGroup>
 
 </Project>

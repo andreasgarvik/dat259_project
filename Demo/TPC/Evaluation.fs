@@ -6,26 +6,23 @@ open Multiset
 module Evaluation =
 
     // From definitions:
-    type Worker = W of int with // range as in index colour set?
-        static member empty = [] // Should this be here?
-        static member all = [for i in 1 .. 2 -> W(i)]
-
+    type Worker = W of int
     type Vote = Yes | No
-    type WorkerVote = WorkerVote of Worker * Vote with
-        static member empty = []
-
+    type WorkerVote = WorkerVote of Worker * Vote
     type Decision = Abort | Commit
-    type WorkerDecision = WorkerDecision of  Worker * Decision with
-        static member empty = []
+    type WorkerDecision = WorkerDecision of  Worker * Decision
 
     // State
     type Marking = {
         CoordinatorIdle : Unit Multiset
         WorkerIdle : Worker Multiset
         CanCommit : Worker Multiset
+        WaitingVotes : Unit Multiset
         Votes : WorkerVote Multiset
+        CollectedVotes : WorkerVote list Multiset
         WaitingDecision : Worker Multiset
         Decision : WorkerDecision Multiset
+        WaitingAcknowledge : Worker list Multiset
         Acknowledge : Worker Multiset
     }
 
@@ -53,36 +50,55 @@ module Evaluation =
 
     //let patternBindingBasis (transition: Transition) =
 
-    type ReceiveCanCommit_Binding = { w : Worker option; vote : Vote option }
-
     // Do some partial binding, combining and merging stuff...
 
     // Bindings in first marking: No enabled ??
-    let receiveCanCommit_BindingOfFirstMarking1 = { w = Some(W(1)); vote = None }
-    let receiveCanCommit_BindingOfFirstMarking2 = { w = Some(W(2)); vote = None }
+    //let receiveCanCommit_BindingOfFirstMarking1 = { w = Some(W(1)); vote = None }
+    //let receiveCanCommit_BindingOfFirstMarking2 = { w = Some(W(2)); vote = None }
 
     // Bindings in second marking: All enabled ??
 
     // From the fact that Vote is a constraint data type
-    let receiveCanCommit_BindingOfSecondMarking1 = { w = Some(W(1)); vote = Some(Yes) }
-    let receiveCanCommit_BindingOfSecondMarking2 = { w = Some(W(1)); vote = Some(No) }
-    let receiveCanCommit_BindingOfSecondMarking3 = { w = Some(W(2)); vote = Some(Yes) }
-    let receiveCanCommit_BindingOfSecondMarking4 = { w = Some(W(2)); vote = Some(No) }
+    //let receiveCanCommit_BindingOfSecondMarking1 = { w = Some(W(1)); vote = Some(Yes) }
+    //let receiveCanCommit_BindingOfSecondMarking2 = { w = Some(W(1)); vote = Some(No) }
+    //let receiveCanCommit_BindingOfSecondMarking3 = { w = Some(W(2)); vote = Some(Yes) }
+    //let receiveCanCommit_BindingOfSecondMarking4 = { w = Some(W(2)); vote = Some(No) }
 
+    type SendCanCommit_Binding = { unit : unit Multiset } // Should this be a multiset? { unit : Multiset unit }
+    type ReceiveCanCommit_Binding = { w : Worker option; vote : Vote option }
+    type CollectOneVote_Binding = { unit : unit; w : Worker option; vote : Vote option }
+    type AllVoteCollected_Binding = { w : Worker option; vote : Vote option; guard : Worker list }
     type ReceiveDecision_Binding = { w: Worker; decision : Decision option }
-
-    type SendCanCommit_Binding = { unit : unit } //??
+    type ReceiveAcknowledgements_Binding = { w: Worker; decision : Decision option }
 
     // let sendCanCommit_EnabledBindingOfFistMarking = { unit = () }
 
     // Semantic transition
     // Binding = Union of transitions
-    type Transition = | SendCanCommit of SendCanCommit_Binding
-                      | ReceiveCanCommit of ReceiveCanCommit_Binding
-                      | ReceiveDecision of ReceiveDecision_Binding
+    type Binding = | SendCanCommit of SendCanCommit_Binding
+                   | ReceiveCanCommit of ReceiveCanCommit_Binding
+                   | CollectOneVote of CollectOneVote_Binding
+                   | AllVoteCollected of AllVoteCollected_Binding
+                   | ReceiveDecision of ReceiveDecision_Binding
+                   | ReceiveAcknowledgements of ReceiveAcknowledgements_Binding
 
-    let sendCanCommitEnabling (marking: Marking) = if marking.CoordinatorIdle <= (empty) then [SendCanCommit { unit = () }] else []
-    let t = (1^"2") + (1^"2")
+    let sendCanCommitEnabling (marking: Marking) =
+        if 1^() <= marking.CoordinatorIdle
+            then [SendCanCommit { unit = 1^() }]
+        else []
+    let receiveCanCommitEnablingW1 (marking: Marking) =
+        if (1^W(1) <= marking.CanCommit) && (1^W(1) <= marking.WorkerIdle)
+            then [ReceiveCanCommit { w = Some(W(1)); vote = None }]
+        else []
+    let receiveCanCommitEnablingW2 (marking: Marking) =
+        if (1^W(2) <= marking.CanCommit) && (1^W(2) <= marking.WorkerIdle)
+            then [ReceiveCanCommit { w = Some(W(1)); vote = None }]
+        else []
+
+    //let CollectOneVoteEnablingW1Yes (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(1),Yes)) then [CollectOneVote { unit = (); w = Some(W(1)); vote = Some(Yes) }] else []
+    //let CollectOneVoteEnablingW1No (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(1),No)) then [CollectOneVote { unit = (); w = Some(W(1)); vote = Some(No) }] else []
+    //let CollectOneVoteEnablingW2Yes (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(2),Yes)) then [CollectOneVote { unit = (); w = Some(W(2)); vote = Some(Yes) }] else []
+    //let CollectOneVoteEnablingW2No (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(2),No)) then [CollectOneVote { unit = (); w = Some(W(2)); vote = Some(No) }] else []
 
     // let workerIdle_receiveCanCommit {
     //     place = workerIdle
@@ -93,31 +109,53 @@ module Evaluation =
 
     //let partialBind (arc : Arc) =
 
-    let enabling (transition: Transition, marking: Marking) =
+    let initialMarking = {
+        CoordinatorIdle = 1^()
+        WorkerIdle = (1^W(1)) + (1^W(2))
+        CanCommit = empty
+        WaitingVotes = empty
+        Votes = empty
+        CollectedVotes = 1^[]
+        WaitingDecision = empty
+        Decision = empty
+        WaitingAcknowledge = empty
+        Acknowledge = empty
+    }
 
-    // Enabling function
+    // let enabling (transition: Transition, marking: Marking)
     // Global enabling function (state -> enabled bindings) (Markings -> Binding list)
     // goes through all transitions
 
-    // Global occurrence function: binding state (marking) -> state (marking)
+    let enabling (marking: Marking) =
+        sendCanCommitEnabling marking @
+        receiveCanCommitEnablingW1 marking @
+        receiveCanCommitEnablingW2 marking
+
     // let occurence (binding : Binding) (state : Marking) = state (marking)
+    // Global occurrence function: binding state (marking) -> state (marking)
+    // executes the enabled bindings
 
-    let firstMarking = {
-        CoordinatorIdle = Multiset.create [()]
-        WorkerIdle = Multiset.create Worker.all
-        CanCommit = Multiset.empty
-        Votes = Multiset.create WorkerVote.empty
-        WaitingDecision = Multiset.create Worker.empty
-        Decision = Multiset.create WorkerDecision.empty
-        Acknowledge = Multiset.create Worker.empty
-    }
+    let occurrence (marking: Marking) (binding: Binding)  =
+        match binding with
+        | SendCanCommit b -> { marking with CoordinatorIdle = empty; CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = b.unit  }
+        | ReceiveCanCommit b -> marking
+        | CollectOneVote b -> marking
+        | AllVoteCollected b -> marking
+        | ReceiveDecision b -> marking
+        | ReceiveAcknowledgements b -> marking
 
-    let secondMarking = {
-        CoordinatorIdle = Multiset.create []
-        WorkerIdle = Multiset.create Worker.all
-        CanCommit = Multiset.create Worker.all
-        Votes = Multiset.create WorkerVote.empty
-        WaitingDecision = Multiset.create Worker.empty
-        Decision = Multiset.create WorkerDecision.empty
-        Acknowledge = Multiset.create Worker.empty
-    }
+    let nextMarking =
+        enabling initialMarking |> List.fold occurrence initialMarking
+
+    //let nextMarking = {
+    //    CoordinatorIdle = empty
+    //    WorkerIdle = (1^W(1)) + (1^W(2))
+    //    CanCommit = (1^W(1)) + (1^W(2))
+    //    WaitingVotes = 1^()
+    //    Votes = empty
+    //    CollectedVotes = 1^[]
+    //    WaitingDecision = empty
+    //    Decision = empty
+    //    WaitingAcknowledge = empty
+    //    Acknowledge = empty
+    //}
