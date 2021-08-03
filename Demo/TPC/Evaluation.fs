@@ -67,8 +67,8 @@ module Evaluation =
 
     type SendCanCommit_Binding = { unit : unit } // Should this be a multiset? { unit : Multiset unit }
     type ReceiveCanCommit_Binding = { w : Worker; vote : Vote option }
-    type CollectOneVote_Binding = { unit : unit; w : Worker option; vote : Vote option }
-    type AllVoteCollected_Binding = { w : Worker option; vote : Vote option; guard : Worker list }
+    type CollectOneVote_Binding = { unit : unit; w : Worker; vote : Vote }
+    type AllVoteCollected_Binding = { unit : unit; votes : Vote list; guard : Vote list }
     type ReceiveDecision_Binding = { w: Worker; decision : Decision option }
     type ReceiveAcknowledgements_Binding = { w: Worker; decision : Decision option }
 
@@ -96,10 +96,22 @@ module Evaluation =
             then [ReceiveCanCommit { w = W(2); vote = None }]
         else []
 
-    //let CollectOneVoteEnablingW1Yes (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(1),Yes)) then [CollectOneVote { unit = (); w = Some(W(1)); vote = Some(Yes) }] else []
-    //let CollectOneVoteEnablingW1No (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(1),No)) then [CollectOneVote { unit = (); w = Some(W(1)); vote = Some(No) }] else []
-    //let CollectOneVoteEnablingW2Yes (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(2),Yes)) then [CollectOneVote { unit = (); w = Some(W(2)); vote = Some(Yes) }] else []
-    //let CollectOneVoteEnablingW2No (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(2),No)) then [CollectOneVote { unit = (); w = Some(W(2)); vote = Some(No) }] else []
+    let CollectOneVoteEnablingW1Yes (marking: Marking) =
+        if marking.Votes <= 1^(WorkerVote(W(1),Yes))
+            then [CollectOneVote { unit = (); w = W(1); vote = Yes }]
+        else []
+    let CollectOneVoteEnablingW1No (marking: Marking) =
+        if marking.Votes <= 1^(WorkerVote(W(1),No))
+            then [CollectOneVote { unit = (); w = W(1); vote = No }]
+        else []
+    let CollectOneVoteEnablingW2Yes (marking: Marking) =
+        if marking.Votes <= 1^(WorkerVote(W(2),Yes))
+            then [CollectOneVote { unit = (); w = W(2); vote = Yes }]
+        else []
+    let CollectOneVoteEnablingW2No (marking: Marking) =
+        if marking.Votes <= 1^(WorkerVote(W(2),No))
+            then [CollectOneVote { unit = (); w = W(2); vote = No }]
+        else []
 
     // let workerIdle_receiveCanCommit {
     //     place = workerIdle
@@ -138,7 +150,7 @@ module Evaluation =
 
     let occurrence (marking: Marking) (binding: Binding)  =
         match binding with
-        | SendCanCommit b -> { marking with CoordinatorIdle = empty; CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = 1^b.unit  }
+        | SendCanCommit b -> { marking with CoordinatorIdle = marking.CoordinatorIdle - (1^b.unit); CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = 1^b.unit  }
         | ReceiveCanCommit b -> { marking with CanCommit = marking.CanCommit - (1^b.w); Votes = marking.Votes + (1^WorkerVote(b.w,Yes)) }
         | CollectOneVote b -> marking
         | AllVoteCollected b -> marking
