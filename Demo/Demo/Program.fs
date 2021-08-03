@@ -3,10 +3,17 @@
 
 open TPC
 
+let rec loop (marking: Evaluation.Marking) =
+    let newMarking = Evaluation.step marking
+    if (newMarking = marking)
+        then 0
+    else
+        printfn $"{newMarking}"
+        loop(newMarking)
+
+
 [<EntryPoint>]
 let main _ =
     let initialMarking = Evaluation.initialMarking
     printfn $"{initialMarking}"
-    let nextMarking = Evaluation.nextMarking
-    printfn $"{nextMarking}"
-    0 // return an integer exit code
+    loop(Evaluation.initialMarking)

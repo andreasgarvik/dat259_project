@@ -5,7 +5,7 @@ open Multiset
 
 module Evaluation =
 
-    // From definitions:
+    // From definitions
     type Worker = W of int
     type Vote = Yes | No
     type WorkerVote = WorkerVote of Worker * Vote
@@ -13,6 +13,7 @@ module Evaluation =
     type WorkerDecision = WorkerDecision of  Worker * Decision
 
     // State
+    [<StructuralEquality;StructuralComparison>]
     type Marking = {
         CoordinatorIdle : Unit Multiset
         WorkerIdle : Worker Multiset
@@ -64,8 +65,8 @@ module Evaluation =
     //let receiveCanCommit_BindingOfSecondMarking3 = { w = Some(W(2)); vote = Some(Yes) }
     //let receiveCanCommit_BindingOfSecondMarking4 = { w = Some(W(2)); vote = Some(No) }
 
-    type SendCanCommit_Binding = { unit : unit Multiset } // Should this be a multiset? { unit : Multiset unit }
-    type ReceiveCanCommit_Binding = { w : Worker option; vote : Vote option }
+    type SendCanCommit_Binding = { unit : unit } // Should this be a multiset? { unit : Multiset unit }
+    type ReceiveCanCommit_Binding = { w : Worker; vote : Vote option }
     type CollectOneVote_Binding = { unit : unit; w : Worker option; vote : Vote option }
     type AllVoteCollected_Binding = { w : Worker option; vote : Vote option; guard : Worker list }
     type ReceiveDecision_Binding = { w: Worker; decision : Decision option }
@@ -84,15 +85,15 @@ module Evaluation =
 
     let sendCanCommitEnabling (marking: Marking) =
         if 1^() <= marking.CoordinatorIdle
-            then [SendCanCommit { unit = 1^() }]
+            then [SendCanCommit { unit = () }]
         else []
     let receiveCanCommitEnablingW1 (marking: Marking) =
         if (1^W(1) <= marking.CanCommit) && (1^W(1) <= marking.WorkerIdle)
-            then [ReceiveCanCommit { w = Some(W(1)); vote = None }]
+            then [ReceiveCanCommit { w = W(1); vote = None }]
         else []
     let receiveCanCommitEnablingW2 (marking: Marking) =
         if (1^W(2) <= marking.CanCommit) && (1^W(2) <= marking.WorkerIdle)
-            then [ReceiveCanCommit { w = Some(W(1)); vote = None }]
+            then [ReceiveCanCommit { w = W(2); vote = None }]
         else []
 
     //let CollectOneVoteEnablingW1Yes (marking: Marking) = if marking.Votes <= 1^(WorkerVote(W(1),Yes)) then [CollectOneVote { unit = (); w = Some(W(1)); vote = Some(Yes) }] else []
@@ -127,9 +128,9 @@ module Evaluation =
     // goes through all transitions
 
     let enabling (marking: Marking) =
-        sendCanCommitEnabling marking @
-        receiveCanCommitEnablingW1 marking @
-        receiveCanCommitEnablingW2 marking
+        sendCanCommitEnabling marking
+        @ receiveCanCommitEnablingW1 marking
+        @ receiveCanCommitEnablingW2 marking
 
     // let occurence (binding : Binding) (state : Marking) = state (marking)
     // Global occurrence function: binding state (marking) -> state (marking)
@@ -137,25 +138,15 @@ module Evaluation =
 
     let occurrence (marking: Marking) (binding: Binding)  =
         match binding with
-        | SendCanCommit b -> { marking with CoordinatorIdle = empty; CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = b.unit  }
-        | ReceiveCanCommit b -> marking
+        | SendCanCommit b -> { marking with CoordinatorIdle = empty; CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = 1^b.unit  }
+        | ReceiveCanCommit b -> { marking with CanCommit = marking.CanCommit - (1^b.w); Votes = marking.Votes + (1^WorkerVote(b.w,Yes)) }
         | CollectOneVote b -> marking
         | AllVoteCollected b -> marking
         | ReceiveDecision b -> marking
         | ReceiveAcknowledgements b -> marking
 
-    let nextMarking =
-        enabling initialMarking |> List.fold occurrence initialMarking
-
-    //let nextMarking = {
-    //    CoordinatorIdle = empty
-    //    WorkerIdle = (1^W(1)) + (1^W(2))
-    //    CanCommit = (1^W(1)) + (1^W(2))
-    //    WaitingVotes = 1^()
-    //    Votes = empty
-    //    CollectedVotes = 1^[]
-    //    WaitingDecision = empty
-    //    Decision = empty
-    //    WaitingAcknowledge = empty
-    //    Acknowledge = empty
-    //}
+    let step (marking: Marking) =
+        let enabledBindings = enabling marking
+        match enabledBindings.Length with
+            | 0 -> marking
+            | _ -> List.fold occurrence marking (List.take 1 enabledBindings)
