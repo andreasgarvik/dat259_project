@@ -23,4 +23,6 @@ module Multiset =
         match Map.tryFind c bms.multiset with
         | Some x' -> x <= x'
         | None -> false ) ams.multiset
-    let toList ms = Map.toList ms.multiset |> List.head |> fst
+    let toList ms = if not (Map.isEmpty ms.multiset)
+                        then Map.toList ms.multiset |> List.head |> fst
+                    else []

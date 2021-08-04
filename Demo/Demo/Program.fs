@@ -2,18 +2,20 @@
 // Define a function to construct a message to print
 
 open TPC
+open Evaluation
 
-let rec loop (marking: Evaluation.Marking) =
-    let newMarking = Evaluation.step marking
-    if (newMarking = marking)
-        then 0
+let rec loop (marking: Marking, n: int) =
+    let marking = step marking
+    if (stop marking)
+        then
+            printfn $"{marking}"
+            0
     else
-        printfn $"{newMarking}"
-        loop(newMarking)
+        printfn $"{marking}"
+        loop(marking, n+1)
 
 
 [<EntryPoint>]
 let main _ =
-    let initialMarking = Evaluation.initialMarking
     printfn $"{initialMarking}"
-    loop(Evaluation.initialMarking)
+    loop(initialMarking, 0)
