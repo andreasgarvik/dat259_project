@@ -6,11 +6,12 @@ open Multiset
 module Evaluation =
 
     // From definitions
-    type Worker = W of int
+    let W = 2
+    type Worker = int
     type Vote = Yes | No
-    type WorkerVote = WorkerVote of Worker * Vote
+    type WorkerVote = Worker * Vote
     type Decision = Abort | Commit
-    type WorkerDecision = WorkerDecision of  Worker * Decision
+    type WorkerDecision = Worker * Decision
 
     // State
     [<StructuralEquality;StructuralComparison>]
@@ -65,12 +66,12 @@ module Evaluation =
     //let receiveCanCommit_BindingOfSecondMarking3 = { w = Some(W(2)); vote = Some(Yes) }
     //let receiveCanCommit_BindingOfSecondMarking4 = { w = Some(W(2)); vote = Some(No) }
 
-    type SendCanCommit_Binding = { unit : unit } // Should this be a multiset? { unit : Multiset unit }
-    type ReceiveCanCommit_Binding = { w : Worker; vote : Vote option }
-    type CollectOneVote_Binding = { unit : unit; w : Worker; vote : Vote }
-    type AllVoteCollected_Binding = { unit : unit; votes : Vote list; guard : Vote list }
-    type ReceiveDecision_Binding = { w: Worker; decision : Decision option }
-    type ReceiveAcknowledgements_Binding = { w: Worker; decision : Decision option }
+    type SendCanCommit_Binding = unit
+    type ReceiveCanCommit_Binding = { w : Worker; vote : Vote }
+    type CollectOneVote_Binding = { workerVote: WorkerVote }
+    type AllVoteCollected_Binding = { votes : WorkerVote list; }
+    type ReceiveDecision_Binding = { workerDecision : WorkerDecision }
+    type ReceiveAcknowledgements_Binding = unit
 
     // let sendCanCommit_EnabledBindingOfFistMarking = { unit = () }
 
@@ -85,33 +86,62 @@ module Evaluation =
 
     let sendCanCommitEnabling (marking: Marking) =
         if 1^() <= marking.CoordinatorIdle
-            then [SendCanCommit { unit = () }]
+            then [SendCanCommit ()]
         else []
     let receiveCanCommitEnablingW1 (marking: Marking) =
-        if (1^W(1) <= marking.CanCommit) && (1^W(1) <= marking.WorkerIdle)
-            then [ReceiveCanCommit { w = W(1); vote = None }]
+        if (1^1 <= marking.CanCommit) && (1^1 <= marking.WorkerIdle)
+            then [ReceiveCanCommit { w = 1; vote = Yes }; ReceiveCanCommit { w = 1; vote = No }]
         else []
     let receiveCanCommitEnablingW2 (marking: Marking) =
-        if (1^W(2) <= marking.CanCommit) && (1^W(2) <= marking.WorkerIdle)
-            then [ReceiveCanCommit { w = W(2); vote = None }]
+        if (1^2 <= marking.CanCommit) && (1^2 <= marking.WorkerIdle)
+            then [ReceiveCanCommit { w = 2; vote = Yes }; ReceiveCanCommit { w = 2; vote = No }]
         else []
 
-    let CollectOneVoteEnablingW1Yes (marking: Marking) =
-        if marking.Votes <= 1^(WorkerVote(W(1),Yes))
-            then [CollectOneVote { unit = (); w = W(1); vote = Yes }]
+    let collectOneVoteEnablingW1Yes (marking: Marking) =
+        if 1^(1,Yes) <= marking.Votes
+            then [CollectOneVote { workerVote = (1,Yes) }]
         else []
-    let CollectOneVoteEnablingW1No (marking: Marking) =
-        if marking.Votes <= 1^(WorkerVote(W(1),No))
-            then [CollectOneVote { unit = (); w = W(1); vote = No }]
+    let collectOneVoteEnablingW1No (marking: Marking) =
+        if 1^(1,No) <= marking.Votes
+            then [CollectOneVote { workerVote = (1,No) }]
         else []
-    let CollectOneVoteEnablingW2Yes (marking: Marking) =
-        if marking.Votes <= 1^(WorkerVote(W(2),Yes))
-            then [CollectOneVote { unit = (); w = W(2); vote = Yes }]
+    let collectOneVoteEnablingW2Yes (marking: Marking) =
+        if 1^(2,Yes) <= marking.Votes
+            then [CollectOneVote { workerVote = (2,Yes) }]
         else []
-    let CollectOneVoteEnablingW2No (marking: Marking) =
-        if marking.Votes <= 1^(WorkerVote(W(2),No))
-            then [CollectOneVote { unit = (); w = W(2); vote = No }]
+    let collectOneVoteEnablingW2No (marking: Marking) =
+        if 1^(2,No) <= marking.Votes
+            then [CollectOneVote { workerVote = (2,No) }]
         else []
+    let allVoteCollectedEnablingYesYes (marking: Marking) =
+        if 1^[(1,Yes); (2,Yes)] <= marking.CollectedVotes
+            then [AllVoteCollected { votes = [(1,Yes); (2,Yes)] }]
+        else []
+    let allVoteCollectedEnablingYesNo (marking: Marking) =
+        if 1^[(1,Yes); (2,No)] <= marking.CollectedVotes
+            then [AllVoteCollected { votes = [(1,Yes); (2,Yes)] }]
+        else []
+    let allVoteCollectedEnablingNoYes (marking: Marking) =
+        if 1^[(1,No); (2,Yes)] <= marking.CollectedVotes
+            then [AllVoteCollected { votes = [(1,Yes); (2,Yes)] }]
+        else []
+    let allVoteCollectedEnablingNoNo (marking: Marking) =
+        if 1^[(1,No); (2,No)] <= marking.CollectedVotes
+            then [AllVoteCollected { votes = [(1,Yes); (2,Yes)] }]
+        else []
+    let receiveDecisionEnabledW1Commit (marking: Marking) =
+        if 1^(1,Commit) <= marking.Decision
+            then [ReceiveDecision { workerDecision = (1,Commit) }]
+        else []
+    let receiveDecisionEnabledW2Commit (marking: Marking) =
+        if 1^(2,Commit) <= marking.Decision
+            then [ReceiveDecision { workerDecision = (2,Commit) }]
+        else []
+    let receiveAcknowledgementsEnabling (marking: Marking) =
+        if ((toList marking.WaitingAcknowledge |> List.fold (fun acc w -> acc + (1^w)) empty ) <= marking.Acknowledge)
+            then [ReceiveAcknowledgements ()]
+        else []
+
 
     // let workerIdle_receiveCanCommit {
     //     place = workerIdle
@@ -124,7 +154,7 @@ module Evaluation =
 
     let initialMarking = {
         CoordinatorIdle = 1^()
-        WorkerIdle = (1^W(1)) + (1^W(2))
+        WorkerIdle = (1^1) + (1^2)
         CanCommit = empty
         WaitingVotes = empty
         Votes = empty
@@ -143,6 +173,17 @@ module Evaluation =
         sendCanCommitEnabling marking
         @ receiveCanCommitEnablingW1 marking
         @ receiveCanCommitEnablingW2 marking
+        @ collectOneVoteEnablingW1Yes marking
+        @ collectOneVoteEnablingW1No marking
+        @ collectOneVoteEnablingW2Yes marking
+        @ collectOneVoteEnablingW2No marking
+        @ allVoteCollectedEnablingYesYes marking
+        @ allVoteCollectedEnablingYesNo marking
+        @ allVoteCollectedEnablingNoYes marking
+        @ allVoteCollectedEnablingNoNo marking
+        @ receiveDecisionEnabledW1Commit marking
+        @ receiveDecisionEnabledW2Commit marking
+        @ receiveAcknowledgementsEnabling marking
 
     // let occurence (binding : Binding) (state : Marking) = state (marking)
     // Global occurrence function: binding state (marking) -> state (marking)
@@ -150,12 +191,37 @@ module Evaluation =
 
     let occurrence (marking: Marking) (binding: Binding)  =
         match binding with
-        | SendCanCommit b -> { marking with CoordinatorIdle = marking.CoordinatorIdle - (1^b.unit); CanCommit = (1^W(1)) + (1^W(2)); WaitingVotes = 1^b.unit  }
-        | ReceiveCanCommit b -> { marking with CanCommit = marking.CanCommit - (1^b.w); Votes = marking.Votes + (1^WorkerVote(b.w,Yes)) }
-        | CollectOneVote b -> marking
-        | AllVoteCollected b -> marking
-        | ReceiveDecision b -> marking
-        | ReceiveAcknowledgements b -> marking
+        | SendCanCommit _ -> {
+            marking with
+                CoordinatorIdle = marking.CoordinatorIdle - (1^()) // Good enough with empty here: CoordinatorIdle = empty ?
+                CanCommit = (1^1) + (1^2)
+                WaitingVotes = 1^() }
+        | ReceiveCanCommit b -> {
+            marking with
+                CanCommit = marking.CanCommit - (1^b.w)
+                Votes = marking.Votes + (1^(b.w,b.vote)) }
+        | CollectOneVote b -> {
+            marking with
+                Votes = marking.Votes - (1^b.workerVote)
+                CollectedVotes = 1^b.workerVote :: (toList marking.CollectedVotes) }
+        | AllVoteCollected b -> {
+            marking with
+                WaitingVotes = marking.WaitingVotes - (1^())
+                CollectedVotes = 1^[]
+                WaitingAcknowledge = 1^(List.filter (fun (_,vote) -> vote = Yes) b.votes |> List.map fst)
+                Decision = if ((List.filter (fun (_,vote) -> vote = Yes) b.votes |> List.length) = W)
+                               then (1^(1,Commit)) + (1^(2,Commit))
+                           else (1^(1,Abort)) + (1^(2,Abort)) }
+        | ReceiveDecision b -> {
+            marking with
+                Decision = marking.Decision - (1^b.workerDecision)
+                Acknowledge = marking.Acknowledge + (1^fst b.workerDecision) }
+        | ReceiveAcknowledgements _ -> {
+            marking with
+                WaitingAcknowledge = empty // Good enough with empty here or pass what to remove from enable binding function ?
+                Acknowledge = empty
+                CoordinatorIdle = 1^()
+        }
 
     let step (marking: Marking) =
         let enabledBindings = enabling marking

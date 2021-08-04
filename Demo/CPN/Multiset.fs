@@ -1,4 +1,7 @@
 namespace CPN
+
+open CPN
+
 type Multiset<'a when 'a: comparison> = private { multiset: Map<'a, int> }
 
 module Multiset =
@@ -20,3 +23,4 @@ module Multiset =
         match Map.tryFind c bms.multiset with
         | Some x' -> x <= x'
         | None -> false ) ams.multiset
+    let toList ms = Map.toList ms.multiset |> List.head |> fst
