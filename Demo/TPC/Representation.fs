@@ -92,37 +92,37 @@ module Representation =
     let Arcs = [
         {
             place = coordinatorIdle
-            transaction = sendCanCommit
+            transition = sendCanCommit
             expr = "1'()"
             direction = PT
         }
         {
             place = workerIdle
-            transaction = receiveCanCommit
+            transition = receiveCanCommit
             expr = "w"
             direction = PT
         }
         {
             place = waitingDecision
-            transaction = receiveCanCommit
+            transition = receiveCanCommit
             expr = "if vote = Yes then 1`w else empty"
             direction = TP
         }
         {
             place = waitingDecision
-            transaction = receiveDecision
+            transition = receiveDecision
             expr = "w"
             direction = PT
         }
         {
             place = workerIdle
-            transaction = receiveDecision
+            transition = receiveDecision
             expr = "w"
             direction = TP
         }
         {
             place = workerIdle
-            transaction = receiveCanCommit
+            transition = receiveCanCommit
             expr = "if vote = No then 1`w else empty"
             direction = TP
         }

@@ -42,7 +42,7 @@ type Direction =
 
 type Arc = {
     place : Place
-    transaction : Transition
+    transition : Transition
     expr : string
     direction : Direction
 }
