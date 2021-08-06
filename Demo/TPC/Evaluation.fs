@@ -206,7 +206,7 @@ module Evaluation =
         match binding with
         | SendCanCommit _ -> {
             marking with
-                CoordinatorIdle = marking.CoordinatorIdle - (1^()) // Good enough with empty here: CoordinatorIdle = empty ?
+                CoordinatorIdle = empty
                 CanCommit = (1^1) + (1^2)
                 WaitingVotes = 1^() }
         | ReceiveCanCommit b -> {
@@ -234,7 +234,7 @@ module Evaluation =
                 WaitingDecision = empty }
         | ReceiveAcknowledgements _ -> {
             marking with
-                WaitingAcknowledge = empty // Good enough with empty here or pass what to remove from enable binding function ?
+                WaitingAcknowledge = empty
                 Acknowledge = empty
                 CoordinatorIdle = 1^()
         }
