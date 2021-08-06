@@ -147,7 +147,7 @@ module Evaluation =
         else []
     let receiveAcknowledgementsEnabling (marking: Marking) =
         if (
-            (toList marking.WaitingAcknowledge |> List.isEmpty |> not) && // This is temp to get my poor logic to work, might not ne needed
+            (marking.WaitingAcknowledge |> isEmpty |> not) && // This is temp to get my poor logic to work, might not ne needed
             (toList marking.WaitingAcknowledge |> List.fold (fun acc w -> acc + (1^w)) empty ) <= marking.Acknowledge)
             then [ReceiveAcknowledgements ()]
         else []
@@ -202,7 +202,7 @@ module Evaluation =
     // executes the enabled bindings
 
     let occurrence (marking: Marking) (binding: Binding)  =
-        printfn $"Occurrence of bindings {binding}"
+        printfn $"Occurrence of binding {binding}"
         match binding with
         | SendCanCommit _ -> {
             marking with

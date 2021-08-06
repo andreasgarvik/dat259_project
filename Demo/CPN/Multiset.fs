@@ -6,6 +6,7 @@ type Multiset<'a when 'a: comparison> = private { multiset: Map<'a, int> }
 
 module Multiset =
     let empty = { multiset = Map.empty }
+    let isEmpty ms = Map.isEmpty ms.multiset
     let (^) x c = { multiset = (Map.add c x Map.empty) }
     let (+) ams bms = { multiset = (Map.fold (fun ms c x ->
         match Map.tryFind c ms with
