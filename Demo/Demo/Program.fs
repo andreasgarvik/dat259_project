@@ -4,7 +4,7 @@
 open TPC
 open Evaluation
 
-let rec loop (marking: Marking, n: int) =
+let rec loop (marking: Marking) =
     let marking = step marking
     if (stop marking)
         then
@@ -12,10 +12,10 @@ let rec loop (marking: Marking, n: int) =
             0
     else
         printfn $"{marking}"
-        loop(marking, n+1)
+        loop(marking)
 
 
 [<EntryPoint>]
 let main _ =
     printfn $"{initialMarking}"
-    loop(initialMarking, 0)
+    loop(initialMarking)

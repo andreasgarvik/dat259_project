@@ -14,7 +14,6 @@ module Evaluation =
     type WorkerDecision = Worker * Decision
 
     // State
-    [<StructuralEquality;StructuralComparison>]
     type Marking = {
         CoordinatorIdle : Unit Multiset
         WorkerIdle : Worker Multiset
