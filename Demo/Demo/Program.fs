@@ -8,14 +8,14 @@ let rec loop (marking: Marking) =
     let marking = step marking
     if (stop marking)
         then
-            printfn $"{marking}"
+            printfn $"Marking \n {marking}"
             0
     else
-        printfn $"{marking}"
+        printfn $"Marking \n {marking}"
         loop(marking)
 
 
 [<EntryPoint>]
 let main _ =
-    printfn $"{initialMarking}"
+    printfn $"Marking \n {initialMarking}"
     loop(initialMarking)
