@@ -4,12 +4,12 @@ open CPN
 
 module Representation =
     let coordinatorIdle = {
-        name = "Coordinator Idle"
+        name = "CoordinatorIdle"
         colset = "Unit"
         initialMarking = "()"
     }
     let workerIdle = {
-        name = "Worker Idle"
+        name = "WorkerIdle"
         colset = "Worker"
         initialMarking = "Worker.all()"
     }
@@ -19,7 +19,7 @@ module Representation =
         initialMarking = ""
     }
     let waitingVotes = {
-        name = "Waiting Votes"
+        name = "WaitingVotes"
         colset = "()"
         initialMarking = ""
     }
@@ -29,12 +29,12 @@ module Representation =
         initialMarking = ""
     }
     let collectedVotes = {
-        name = "Collected Votes"
+        name = "CollectedVotes"
         colset = "WorkerxVotes"
         initialMarking = "[]"
     }
     let waitingDecision = {
-        name = "Waiting Decision"
+        name = "WaitingDecision"
         colset = "Worker"
         initialMarking = ""
     }
@@ -44,7 +44,7 @@ module Representation =
         initialMarking = ""
     }
     let waitingAcknowledgements = {
-        name = "Waiting Acknowledgements"
+        name = "WaitingAcknowledgements"
         colset = "Workers"
         initialMarking = ""
     }
@@ -67,18 +67,18 @@ module Representation =
     ]
 
     let sendCanCommit = {
-        name = "Send CanCommit"
+        name = "SendCanCommit"
         vars = []
         guard = None
     }
     let receiveCanCommit = {
-        name = "Receive CanCommit"
+        name = "ReceiveCanCommit"
         vars = [ "w"; "vote"]
         guard = None
     }
 
     let receiveDecision = {
-        name = "Receive Decision"
+        name = "ReceiveDecision"
         vars = [ "w"; "decision"]
         guard = None
     }

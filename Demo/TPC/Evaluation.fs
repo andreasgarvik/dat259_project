@@ -246,5 +246,5 @@ module Evaluation =
         match enabledBindings.Length with
             | 0 -> marking
             | _ -> enabledBindings |> randomEnabledBinding |> occurrence marking
-            
+
     let stop (marking: Marking) = 1^() <= marking.CoordinatorIdle
