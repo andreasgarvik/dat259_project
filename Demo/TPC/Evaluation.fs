@@ -203,16 +203,17 @@ module Evaluation =
     let occurrence (marking: Marking) (binding: Binding)  =
         printfn $"Occurrence of binding {binding}"
         match binding with
-        | SendCanCommit _ -> {
+        | SendCanCommit b -> {
             marking with
-                CoordinatorIdle = empty
+                CoordinatorIdle = marking.CoordinatorIdle - (1^b)
                 CanCommit = (1^1) + (1^2)
-                WaitingVotes = 1^() }
+                WaitingVotes = 1^b }
         | ReceiveCanCommit b -> {
             marking with
+                WorkerIdle = marking.WorkerIdle - (1^b.w) + if (b.vote = No) then 1^b.w else empty
                 CanCommit = marking.CanCommit - (1^b.w)
                 Votes = marking.Votes + (1^(b.w,b.vote))
-                WaitingDecision = marking.WaitingDecision + if (b.vote = Yes) then 1^b.w else empty}
+                WaitingDecision = marking.WaitingDecision + if (b.vote = Yes) then 1^b.w else empty }
         | CollectOneVote b -> {
             marking with
                 Votes = marking.Votes - (1^b.workerVote)
@@ -228,9 +229,10 @@ module Evaluation =
                     List.fold (fun acc w ->  acc + (1^(w, decision))) empty yesWorkers }
         | ReceiveDecision b -> {
             marking with
+                WaitingDecision = marking.WaitingDecision - (1^fst b.workerDecision)
                 Decision = marking.Decision - (1^b.workerDecision)
                 Acknowledge = marking.Acknowledge + (1^fst b.workerDecision)
-                WaitingDecision = empty }
+                WorkerIdle = marking.WorkerIdle + (1^fst b.workerDecision) }
         | ReceiveAcknowledgements _ -> {
             marking with
                 WaitingAcknowledge = empty

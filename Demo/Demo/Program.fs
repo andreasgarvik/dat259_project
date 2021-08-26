@@ -1,6 +1,8 @@
 ﻿// Learn more about F# at http://docs.microsoft.com/dotnet/fsharp
 // Define a function to construct a message to print
 
+open CPN
+open Multiset
 open TPC
 open Evaluation
 
