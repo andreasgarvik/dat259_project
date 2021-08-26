@@ -1,2 +1,3 @@
-# DAT259 Project - Two-phase Commit Protocol in F#
-Pre master thesis related work
+# DAT259 Project 
+## Coloured Petri nets Representation and <br/> Simulation using F\# and the .NET platform
+The purpose of this project was to explore Coloured Petri nets (CPN) and undertake initial investigations on how it may be implemented on the .NET platform. The main goal was to manually create code representing a CPN model in .NET using the F\# programming language. The code, when executed, should resemble the execution of the CPN model in CPN Tools, step my step with all its intermediate markings. The CPN model used as an example was a two-phase commit protocol. In addition, general understanding of CPNs and the F\# was necessary and acquired during this project. 
