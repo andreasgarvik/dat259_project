@@ -250,3 +250,4 @@ module Evaluation =
             | _ -> enabledBindings |> randomEnabledBinding |> occurrence marking
 
     let stop (marking: Marking) = 1^() <= marking.CoordinatorIdle
+    let dead (currentMarking: Marking) (nextMarking: Marking)  = currentMarking = nextMarking

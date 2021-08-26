@@ -6,15 +6,20 @@ open Multiset
 open TPC
 open Evaluation
 
-let rec loop (marking: Marking) =
-    let marking = step marking
-    if (stop marking)
+let rec loop (currentMarking: Marking) =
+    let nextMarking = step currentMarking
+    if (dead currentMarking nextMarking)
         then
-            printfn $"Marking \n {marking}"
+            printfn $"Dead Marking \n {nextMarking}"
             0
     else
-        printfn $"Marking \n {marking}"
-        loop(marking)
+        if (stop nextMarking)
+            then
+                printfn $"Marking \n {nextMarking}"
+                0
+        else
+            printfn $"Marking \n {nextMarking}"
+            loop(nextMarking)
 
 
 [<EntryPoint>]
