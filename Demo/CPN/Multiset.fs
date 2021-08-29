@@ -20,12 +20,12 @@ module Multiset =
         if bms <= ams
         then { multiset = (Map.fold (fun ms c x ->
             match Map.tryFind c ms with
-            | Some x' ->
-                         let n = x'-x
+            | Some x' -> let n = x'-x
                          match n with
                          | 0 -> Map.remove c ms
                          | _ -> Map.add c n ms
-            | None -> Map.add c x ms) ams.multiset bms.multiset ) }
+            | None -> Map.add c x ms)
+                ams.multiset bms.multiset ) }
         else invalidOp "Cannot perform the operation with the given arguments"
     let toList ms = if not (Map.isEmpty ms.multiset)
                         then Map.toList ms.multiset |> List.head |> fst
