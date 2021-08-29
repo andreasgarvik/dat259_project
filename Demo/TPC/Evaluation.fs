@@ -88,8 +88,7 @@ module Evaluation =
             then [SendCanCommit ()]
         else []
     let receiveCanCommitEnablingW1 (marking: Marking) =
-        if (1^1 <= marking.CanCommit)
-            && (1^1 <= marking.WorkerIdle)
+        if (1^1 <= marking.CanCommit) && (1^1 <= marking.WorkerIdle)
             then [ReceiveCanCommit { w = 1; vote = Yes }; ReceiveCanCommit { w = 1; vote = No }]
         else []
     let receiveCanCommitEnablingW2 (marking: Marking) =
